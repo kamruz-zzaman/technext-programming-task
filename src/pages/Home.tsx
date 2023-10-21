@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputGroup, Form, Button, Row, Pagination } from 'react-bootstrap';
+import { InputGroup, Form, Button, Row, Pagination, Spinner } from 'react-bootstrap';
 import { BsSearch } from "react-icons/bs";
 import FlightCard from '../components/FlightCard';
 import axios from 'axios';
@@ -20,11 +20,14 @@ type RocketLaunch = {
 
 export default function Home() {
     const [rocketLaunch, setRocketLaunch] = React.useState<RocketLaunch[]>([]);
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
     React.useEffect(() => {
+        setIsLoading(true);
         axios.get<RocketLaunch[]>('https://api.spacexdata.com/v3/launches')
             .then(res => {
                 setRocketLaunch(res.data);
+                setIsLoading(false);
             });
     }, []);
 
@@ -78,11 +81,17 @@ export default function Home() {
                 </div>
             </div>
             <div className='my-4'>
-                <Row xs={1} md={2} xl={3}>
-                    {rocketLaunch.map((res, i) => (
-                        <FlightCard i={i} data={res} />
-                    ))}
-                </Row>
+                {
+                    isLoading ?
+                        <div className='d-flex justify-content-center align-items-center my-5'>
+                            <Spinner animation="border" variant="primary" />
+                        </div> :
+                        <Row xs={1} md={2} xl={3}>
+                            {rocketLaunch.map((res, i) => (
+                                <FlightCard i={i} data={res} />
+                            ))}
+                        </Row>
+                }
             </div>
             <div className='d-flex justify-content-center'>
                 <Pagination>
