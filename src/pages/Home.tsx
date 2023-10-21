@@ -1,7 +1,7 @@
 import React from 'react';
-import { InputGroup, Form, Button, Row, Col, Card, Pagination, Badge } from 'react-bootstrap';
+import { InputGroup, Form, Button, Row, Pagination } from 'react-bootstrap';
 import { BsSearch } from "react-icons/bs";
-import RocketImage from '../assets/rocket1.png'
+import FlightCard from '../components/FlightCard';
 export default function Home() {
     return (
         <React.Fragment>
@@ -55,30 +55,7 @@ export default function Home() {
             <div className='my-4'>
                 <Row xs={1} md={2} xl={3}>
                     {[1, 1, 1, 1, 1, 1, 1, 1, 1].map((res, i) => (
-                        <Col key={i}>
-                            <Card className='mb-4'>
-                                <img src={RocketImage} className='w-25 mx-auto my-4' alt="" />
-                                <Card.Body className='text-center'>
-                                    <Card.Text>
-                                        <p>22 sept,2023</p>
-                                    </Card.Text>
-                                    <Card.Title>FalconSat</Card.Title>
-                                    <Card.Text>
-                                        <small className="text-muted">Felcon9</small>
-                                    </Card.Text>
-                                    <Card.Text>
-                                        <p>Launch Status:</p>
-                                    </Card.Text>
-                                    <Badge bg="success">
-                                        Success
-                                    </Badge>
-                                    {/* <Badge bg="danger">
-                                                Failed
-                                            </Badge> */}
-
-                                </Card.Body>
-                            </Card>
-                        </Col>
+                        <FlightCard i={i} />
                     ))}
                 </Row>
             </div>
