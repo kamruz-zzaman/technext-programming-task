@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputGroup, Form, Button, Row, Pagination, Spinner } from 'react-bootstrap';
+import { InputGroup, Form, Button, Row, Pagination, Spinner, Alert } from 'react-bootstrap';
 import { BsSearch } from "react-icons/bs";
 import FlightCard from '../components/FlightCard';
 import axios from 'axios';
@@ -27,6 +27,8 @@ export default function Home() {
     const [showUpcomingOnly, setShowUpcomingOnly] = React.useState<boolean>(false);
     const [launchStatusFilter, setLaunchStatusFilter] = React.useState<string>('all');
     const [launchDateFilter, setLaunchDateFilter] = React.useState<string>('all');
+    const [currentPage, setCurrentPage] = React.useState<number>(1);
+    const itemsPerPage = 9;
 
     React.useEffect(() => {
         setIsLoading(true);
@@ -90,9 +92,13 @@ export default function Home() {
 
     };
 
+
+    // Function to paginate the data
+    const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     return (
         <React.Fragment>
-            <div className='text-start text-md-center mt-5'>
+            <div className='text-start text-md-center my-5'>
                 <h2>Spaceflight details</h2>
                 <small>Find out the elaborate features of all the past big spaceflights.</small>
             </div>
@@ -175,27 +181,61 @@ export default function Home() {
                         <div className='d-flex justify-content-center align-items-center my-5'>
                             <Spinner animation="border" variant="primary" />
                         </div> :
-                        <Row xs={1} md={2} xl={3}>
-                            {rocketLaunch.map((res, i) => (
-                                <FlightCard i={i} data={res} />
-                            ))}
-                        </Row>
+                        paginatedData.length === 0 ?
+                            <Alert className='text-center mt-5' variant={'light'}>
+                                No Data Found!
+                            </Alert> :
+                            <div className='my-4'>
+                                <Row xs={1} md={2} xl={3}>
+                                    {paginatedData.map((res, i) => (
+                                        <FlightCard i={i} data={res} />
+                                    ))}
+                                </Row>
+                            </div>
                 }
             </div>
-            <div className='d-flex justify-content-center'>
-                <Pagination>
-                    <Pagination.First />
-                    <Pagination.Prev />
-                    <Pagination.Item>{1}</Pagination.Item>
-                    <Pagination.Ellipsis />
-                    <Pagination.Item>{5}</Pagination.Item>
-                    <Pagination.Ellipsis />
-                    <Pagination.Item>{10}</Pagination.Item>
-                    <Pagination.Next />
-                    <Pagination.Last />
-                </Pagination>
-            </div>
-            <p className='text-center'>Created by the brilliant minds behind SpaceX</p>
+            {
+                filteredData.length > 0 &&
+                <div className='d-flex justify-content-center'>
+                    <Pagination>
+                        <Pagination.Prev
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            disabled={currentPage <= 1}
+                        />
+                        {Array.from({ length: Math.ceil(filteredData.length / itemsPerPage) }).map((_, index) => {
+                            const pages = Math.ceil(filteredData.length / itemsPerPage);
+                            if (pages <= 7) {
+                                return (
+                                    <Pagination.Item key={index} active={index + 1 === currentPage} onClick={() => setCurrentPage(index + 1)}>
+                                        {index + 1}
+                                    </Pagination.Item>
+                                );
+                            } else {
+                                if (index === 0 || index === pages - 1 || (index >= currentPage - 1 && index <= currentPage + 1)) {
+                                    return (
+                                        <Pagination.Item key={index} active={index + 1 === currentPage} onClick={() => setCurrentPage(index + 1)}>
+                                            {index + 1}
+                                        </Pagination.Item>
+                                    );
+                                } else if (index === currentPage - 2 || index === currentPage + 2) {
+                                    return (
+                                        <Pagination.Ellipsis key={index} disabled />
+                                    );
+                                } else {
+                                    return null;
+                                }
+                            }
+                        })}
+                        <Pagination.Next
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            disabled={currentPage >= Math.ceil(filteredData.length / itemsPerPage)}
+                        />
+                    </Pagination>
+
+                </div>
+            }
+
+            <p className={`text-center ${filteredData?.length === 0 && 'fixed-bottom'}`}>Created by the brilliant minds behind SpaceX</p>
         </React.Fragment>
     )
 }
