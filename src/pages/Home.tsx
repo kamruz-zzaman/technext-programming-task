@@ -2,7 +2,32 @@ import React from 'react';
 import { InputGroup, Form, Button, Row, Pagination } from 'react-bootstrap';
 import { BsSearch } from "react-icons/bs";
 import FlightCard from '../components/FlightCard';
+import axios from 'axios';
+
+type RocketLaunch = {
+    flight_number: number;
+    mission_name: string;
+    upcoming: boolean;
+    launch_date_local: string;
+    launch_success: boolean;
+    links: {
+        mission_patch: string;
+    };
+    rocket: {
+        rocket_name: string;
+    };
+};
+
 export default function Home() {
+    const [rocketLaunch, setRocketLaunch] = React.useState<RocketLaunch[]>([]);
+
+    React.useEffect(() => {
+        axios.get<RocketLaunch[]>('https://api.spacexdata.com/v3/launches')
+            .then(res => {
+                setRocketLaunch(res.data);
+            });
+    }, []);
+
     return (
         <React.Fragment>
             <div className='text-start text-md-center mt-5'>
@@ -10,7 +35,7 @@ export default function Home() {
                 <small>Find out the elaborate features of all the past big spaceflights.</small>
             </div>
             <div className='d-none d-md-flex justify-content-end'>
-                <Form.Check // prettier-ignore
+                <Form.Check
                     type={'checkbox'}
                     label={'Show upcoming only'}
                 />
@@ -29,7 +54,7 @@ export default function Home() {
                     </InputGroup>
                 </div>
                 <div className='d-block d-md-none my-2'>
-                    <Form.Check // prettier-ignore
+                    <Form.Check
                         type={'checkbox'}
                         label={'Show upcoming only'}
                     />
@@ -54,8 +79,8 @@ export default function Home() {
             </div>
             <div className='my-4'>
                 <Row xs={1} md={2} xl={3}>
-                    {[1, 1, 1, 1, 1, 1, 1, 1, 1].map((res, i) => (
-                        <FlightCard i={i} />
+                    {rocketLaunch.map((res, i) => (
+                        <FlightCard i={i} data={res} />
                     ))}
                 </Row>
             </div>
