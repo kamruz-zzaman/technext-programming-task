@@ -23,6 +23,10 @@ export default function Home() {
     const [rocketLaunch, setRocketLaunch] = React.useState<RocketLaunch[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [filteredData, setFilteredData] = React.useState<RocketLaunch[]>([]);
+    const [searchText, setSearchText] = React.useState<string>('');
+    const [showUpcomingOnly, setShowUpcomingOnly] = React.useState<boolean>(false);
+    const [launchStatusFilter, setLaunchStatusFilter] = React.useState<string>('all');
+    const [launchDateFilter, setLaunchDateFilter] = React.useState<string>('all');
 
     React.useEffect(() => {
         setIsLoading(true);
@@ -96,17 +100,29 @@ export default function Home() {
                 <Form.Check
                     type={'checkbox'}
                     label={'Show upcoming only'}
+                    checked={showUpcomingOnly}
+                    onChange={(e) => {
+                        filterRocketLaunches(searchText, e.target.checked, launchStatusFilter, launchDateFilter)
+                        setShowUpcomingOnly(e.target.checked)
+                    }}
                 />
             </div>
             <div className='d-md-flex justify-content-between align-items-center'>
                 <div>
                     <InputGroup>
                         <Form.Control
-                            placeholder="Recipient's username"
-                            aria-label="Recipient's username"
+                            placeholder="Search..."
+                            aria-label="Search..."
                             aria-describedby="basic-addon2"
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
                         />
-                        <Button className='bg-primary text-light' variant="outline-secondary" id="button-addon2">
+                        <Button
+                            onClick={() => filterRocketLaunches(searchText, showUpcomingOnly, launchStatusFilter, launchDateFilter)}
+                            className='bg-primary text-light'
+                            variant="outline-secondary"
+                            id="button-addon2"
+                        >
                             <BsSearch />
                         </Button>
                     </InputGroup>
@@ -115,22 +131,40 @@ export default function Home() {
                     <Form.Check
                         type={'checkbox'}
                         label={'Show upcoming only'}
+                        checked={showUpcomingOnly}
+                        onChange={(e) => {
+                            filterRocketLaunches(searchText, e.target.checked, launchStatusFilter, launchDateFilter)
+                            setShowUpcomingOnly(e.target.checked)
+                        }}
                     />
                 </div>
                 <div className='d-md-flex align-items-center'>
                     <div>
-                        <Form.Select aria-label="Default select example">
-                            <option>By Launch Status</option>
-                            <option value="1">Failed</option>
-                            <option value="2">Success</option>
+                        <Form.Select
+                            aria-label="Default select example"
+                            value={launchStatusFilter}
+                            onChange={(e) => {
+                                filterRocketLaunches(searchText, showUpcomingOnly, e.target.value, launchDateFilter)
+                                setLaunchStatusFilter(e.target.value)
+                            }}
+                        >
+                            <option value="all">By Launch Status</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Success">Success</option>
                         </Form.Select>
                     </div>
                     <div className='ms-md-4 my-2 my-md-0'>
-                        <Form.Select aria-label="Default select example">
-                            <option>By Launch Date</option>
-                            <option value="1">Last Weak</option>
-                            <option value="2">Last Month</option>
-                            <option value="2">Last Year</option>
+                        <Form.Select
+                            aria-label="Default select example"
+                            onChange={(e) => {
+                                filterRocketLaunches(searchText, showUpcomingOnly, launchStatusFilter, e.target.value)
+                                setLaunchDateFilter(e.target.value)
+                            }}
+                        >
+                            <option value="all">By Launch Date</option>
+                            <option value="lastWeek">Last Week</option>
+                            <option value="lastMonth">Last Month</option>
+                            <option value="lastYear">Last Year</option>
                         </Form.Select>
                     </div>
                 </div>
