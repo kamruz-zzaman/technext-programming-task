@@ -3,6 +3,7 @@ import { InputGroup, Form, Button, Row, Pagination, Spinner } from 'react-bootst
 import { BsSearch } from "react-icons/bs";
 import FlightCard from '../components/FlightCard';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 type RocketLaunch = {
     flight_number: number;
@@ -21,15 +22,69 @@ type RocketLaunch = {
 export default function Home() {
     const [rocketLaunch, setRocketLaunch] = React.useState<RocketLaunch[]>([]);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    const [filteredData, setFilteredData] = React.useState<RocketLaunch[]>([]);
 
     React.useEffect(() => {
         setIsLoading(true);
         axios.get<RocketLaunch[]>('https://api.spacexdata.com/v3/launches')
             .then(res => {
                 setRocketLaunch(res.data);
+                setFilteredData(res.data);
                 setIsLoading(false);
             });
     }, []);
+
+    const filterRocketLaunches = (search: string, upcoming: boolean, status: string, date: string) => {
+        setIsLoading(true);
+        setTimeout(() => {
+            setFilteredData(rocketLaunch.filter((launch) => {
+                // Filter by search text
+                if (search && !launch.mission_name.toLowerCase().includes(search.toLowerCase())) {
+                    setIsLoading(false);
+                    return false;
+                }
+
+                // Filter by show upcoming only
+                if (upcoming && !launch.upcoming) {
+                    setIsLoading(false);
+                    return false;
+                }
+
+                // Filter by launch status
+                if (status !== 'all') {
+                    if (!launch.launch_success && status !== 'Failed') {
+                        setIsLoading(false);
+                        return false;
+                    }
+                    if (launch.launch_success && status !== 'Success') {
+                        setIsLoading(false);
+                        return false;
+                    }
+                }
+
+                // Filter by launch date
+                if (date !== 'all') {
+                    const launchDate = dayjs(launch.launch_date_local);
+                    const now = dayjs();
+                    if (date === 'lastWeek' && now.diff(launchDate, 'days') > 7) {
+                        setIsLoading(false);
+                        return false;
+                    }
+                    if (date === 'lastMonth' && now.diff(launchDate, 'days') > 30) {
+                        setIsLoading(false);
+                        return false;
+                    }
+                    if (date === 'lastYear' && now.diff(launchDate, 'days') > 365) {
+                        setIsLoading(false);
+                        return false;
+                    }
+                }
+                setIsLoading(false);
+                return true;
+            }));
+        }, 1000)
+
+    };
 
     return (
         <React.Fragment>
